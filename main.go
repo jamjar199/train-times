@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -90,13 +89,7 @@ func makeRequest(request string) (*TrainTime, bool) {
 	}
 	defer transResp.Body.Close()
 
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(transResp.Body)
-	newStr := buf.String()
-
-	// fmt.Println(transResp.Body)
-
-	times, jsonError := formatJson(newStr)
+	times, jsonError := formatJson(transResp.Body)
 	if jsonError {
 		return &TrainTime{}, true
 	}
