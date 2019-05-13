@@ -24,14 +24,16 @@ func trainTimes() bool {
 		fmt.Println(message)
 		return false
 	}
+
 	request := formatTrainStationRequest(input)
-	resp, respError := makeRequest(request)
-	if respError != nil {
+	jsonBody, respError := makeRequest(request)
+	if respError {
 		fmt.Println("Error making http request")
 		return false
 	}
-	body := handleResopnse(resp)
-	fmt.Println(body)
+
+	data, _ := formatJson(jsonBody)
+	//fmt.Println(body)
 	return true
 
 }
@@ -68,19 +70,30 @@ func validateStationCode(input string) bool {
 
 // Formats the request into a url with path parameters
 func formatTrainStationRequest(input string) string {
-	// url := strings.Join(input, "https://transportapi.com/v3/uk/train/station/")
 	return "https://transportapi.com/v3/uk/train/station/" + input + "/live.json?app_id=" + transportApp + "&app_key=" + transportKey + "&darwin=false&train_status=passenger"
 }
 
 // Makes a http get request
-func makeRequest(request string) (*http.Response, error) {
+func makeRequest(request string) ([]byte, bool) {
 	transResp, transError := http.Get(request)
-	return transResp, transError
+
+	if transError != nil {
+		return []byte(""), true
+	} else {
+		data, _ := ioutil.ReadAll(transResp.Body)
+		fmt.Println(string(data))
+		return data, false
+	}
 }
 
-func handleResopnse(resp *http.Response) ([]byte, error) {
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+type TrainTime struct {
+	Time      string
+	Location  string
+	Transport string
+}
+
+func formatJson(json []byte) (*TrainTime, error) {
+	fmt.Println(string(json))
 
 	return body, err
 }
