@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -11,6 +13,13 @@ import (
 
 const transportApp = "8cd3c6eb"
 const transportKey = "35ffde015d8d54f31a68c48b74ac8a71"
+
+// Train Times struct
+type TrainTime struct {
+	Time      string `json:"aimed_departure_time"`
+	Location  string `json:"destination_name"`
+	Transport string `json:"mode"`
+}
 
 func main() {
 	trainTimes()
@@ -26,14 +35,13 @@ func trainTimes() bool {
 	}
 
 	request := formatTrainStationRequest(input)
-	jsonBody, respError := makeRequest(request)
+	times, respError := makeRequest(request)
 	if respError {
 		fmt.Println("Error making http request")
 		return false
 	}
 
-	data, _ := formatJson(jsonBody)
-	//fmt.Println(body)
+	fmt.Println(times)
 	return true
 
 }
@@ -74,26 +82,36 @@ func formatTrainStationRequest(input string) string {
 }
 
 // Makes a http get request
-func makeRequest(request string) ([]byte, bool) {
+func makeRequest(request string) (*TrainTime, bool) {
 	transResp, transError := http.Get(request)
 
 	if transError != nil {
-		return []byte(""), true
-	} else {
-		data, _ := ioutil.ReadAll(transResp.Body)
-		fmt.Println(string(data))
-		return data, false
+		return &TrainTime{}, true
 	}
+	defer transResp.Body.Close()
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(transResp.Body)
+	newStr := buf.String()
+
+	// fmt.Println(transResp.Body)
+
+	times, jsonError := formatJson(newStr)
+	if jsonError {
+		return &TrainTime{}, true
+	}
+	return times, false
+
 }
 
-type TrainTime struct {
-	Time      string
-	Location  string
-	Transport string
-}
+// Format response to Train Times struct
+func formatJson(r io.Reader) (*TrainTime, bool) {
+	times := new(TrainTime)
 
-func formatJson(json []byte) (*TrainTime, error) {
-	fmt.Println(string(json))
-
-	return body, err
+	err := json.NewDecoder(r).Decode(times)
+	if err != nil {
+		return &TrainTime{}, true
+	}
+	fmt.Println(times)
+	return times, false
 }
