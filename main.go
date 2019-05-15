@@ -15,9 +15,12 @@ const transportKey = "35ffde015d8d54f31a68c48b74ac8a71"
 
 // Train Times struct
 type TrainTime struct {
-	Time      string `json:"aimed_departure_time"`
-	Location  string `json:"destination_name"`
-	Transport string `json:"mode"`
+	Date        string                                  `json:"date"`
+	TimeOfDay   string                                  `json:"time_of_day"`
+	RequestTime string                                  `json:"request_time"`
+	StationName string                                  `json:"station_name"`
+	StationCode string                                  `json:"station_code"`
+	Departures  map[string]map[string]map[string]string `json:"departures"`
 }
 
 func main() {
