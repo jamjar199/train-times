@@ -15,12 +15,23 @@ const transportKey = "35ffde015d8d54f31a68c48b74ac8a71"
 
 // Train Times struct
 type TrainTime struct {
-	Date        string                                  `json:"date"`
-	TimeOfDay   string                                  `json:"time_of_day"`
-	RequestTime string                                  `json:"request_time"`
-	StationName string                                  `json:"station_name"`
-	StationCode string                                  `json:"station_code"`
-	Departures  map[string]map[string]map[string]string `json:"departures"`
+	Date        string `json:"date"`
+	TimeOfDay   string `json:"time_of_day"`
+	RequestTime string `json:"request_time"`
+	StationName string `json:"station_name"`
+	StationCode string `json:"station_code"`
+	Departures  All    `json:"departures"`
+}
+
+type All struct {
+	TimesArray []Time `json:"all"`
+}
+
+type Time struct {
+	Mode          string `json:"mode"`
+	Destination   string `json:"destination_name"`
+	DepartureTime string `json:"aimed_departure_time"`
+	Status        string `json:"status"`
 }
 
 func main() {
@@ -43,9 +54,8 @@ func trainTimes() bool {
 		return false
 	}
 
-	fmt.Println(times)
+	outputData(times)
 	return true
-
 }
 
 // Gets the station the user wahts times for
@@ -108,6 +118,19 @@ func formatJson(r io.Reader) (*TrainTime, bool) {
 	if err != nil {
 		return &TrainTime{}, true
 	}
-	fmt.Println(times)
 	return times, false
+}
+
+func outputData(times *TrainTime) {
+	for i := 0; i < len(times.Departures.TimesArray); i++ {
+		trainTime := times.Departures.TimesArray[i]
+		fmt.Printf(trainTime.DepartureTime)
+		fmt.Printf(" - ")
+		fmt.Printf(trainTime.Destination)
+		fmt.Printf(" - ")
+		fmt.Printf(trainTime.Mode)
+		fmt.Printf(" - ")
+		fmt.Printf(trainTime.Status)
+		fmt.Println("")
+	}
 }
