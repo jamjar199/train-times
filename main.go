@@ -90,7 +90,6 @@ func validateInput(input string) (bool, string) {
 // Validates the input is a station code
 func validateStationCode(input string) bool {
 	regexMatched, _ := regexp.MatchString("^([A-Z]{3})", input)
-	fmt.Println(input, regexMatched)
 	if regexMatched {
 		return true
 	}
@@ -111,7 +110,6 @@ func makeRequest(request string) (*TrainTime, bool) {
 	}
 	defer transResp.Body.Close()
 	times, jsonError := formatJson(transResp.Body)
-	fmt.Println(times)
 	if jsonError {
 		return &TrainTime{}, true
 	}
@@ -130,6 +128,7 @@ func formatJson(r io.Reader) (*TrainTime, bool) {
 	return times, false
 }
 
+// Output train time data
 func outputData(times *TrainTime) {
 	for i := 0; i < len(times.Departures.TimesArray); i++ {
 		trainTime := times.Departures.TimesArray[i]
