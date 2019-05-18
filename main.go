@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -65,7 +66,14 @@ func getInput() string {
 	fmt.Print("Enter Train Station code: ")
 	input, _ := reader.ReadString('\n')
 
-	return strings.TrimRight(input, "\n")
+	return formatInput(input)
+}
+
+// Format users input
+func formatInput(input string) string {
+	input = strings.TrimRight(input, "\n")
+	input = strings.ToUpper(input)
+	return input
 }
 
 // Validate the users input
@@ -80,9 +88,10 @@ func validateInput(input string) (bool, string) {
 }
 
 // Validates the input is a station code
-// TODO: Add regex
 func validateStationCode(input string) bool {
-	if input == "BMC" {
+	regexMatched, _ := regexp.MatchString("^([A-Z]{3})", input)
+	fmt.Println(input, regexMatched)
+	if regexMatched {
 		return true
 	}
 	return false
@@ -101,8 +110,8 @@ func makeRequest(request string) (*TrainTime, bool) {
 		return &TrainTime{}, true
 	}
 	defer transResp.Body.Close()
-
 	times, jsonError := formatJson(transResp.Body)
+	fmt.Println(times)
 	if jsonError {
 		return &TrainTime{}, true
 	}
