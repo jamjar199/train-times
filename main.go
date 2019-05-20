@@ -72,6 +72,7 @@ func getInput() string {
 // Format users input
 func formatInput(input string) string {
 	input = strings.TrimRight(input, "\n")
+	input = strings.TrimRight(input, " ")
 	input = strings.ToUpper(input)
 	return input
 }
@@ -89,11 +90,15 @@ func validateInput(input string) (bool, string) {
 
 // Validates the input is a station code
 func validateStationCode(input string) bool {
-	regexMatched, _ := regexp.MatchString("^([A-Z]{3})", input)
-	if regexMatched {
-		return true
+	if len(input) != 3 {
+		return false
 	}
-	return false
+
+	regexMatched, _ := regexp.MatchString("^([A-Z]{3})", input)
+	if !regexMatched {
+		return false
+	}
+	return true
 }
 
 // Formats the request into a url with path parameters
